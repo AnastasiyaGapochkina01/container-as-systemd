@@ -1,0 +1,7 @@
+---
+# handlers file for docker-systemd
+- name: Restart container
+  systemd:
+    name: "{{ item }}.service"
+    state: restarted
+  loop: "{{ containers | map(attribute='name') | list }}"

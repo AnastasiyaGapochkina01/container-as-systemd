@@ -1,0 +1,22 @@
+[Unit]
+Description={{ item.name }}
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStartPre=bash -c '/usr/bin/docker stop {{ item.name }} || /bin/true'
+ExecStartPre=bash -c '/usr/bin/docker rm {{ item.name }} || /bin/true'
+ExecStart=/usr/bin/docker run --name={{ item.name }} \
+{% if item.ports is defined %}{% if item.ports is string %}-p '{{ item.ports }}' \
+{% endif %}{% endif %}
+{% if item.volumes is defined %}{% if item.volumes is string %}-v '{{ item.volumes }}' \
+{% endif %}{% endif %}
+{% if item.envs is defined %}{% if item.envs is string %}-e '{{ item.envs }}' \
+{% endif %}{% endif %}
+{{ item.image }}
+ExecStop=-/usr/bin/docker stop --time 5 {{ item.name }}
+ExecStop=-/usr/bin/docker rm {{ item.name }}
+
+[Install]
+WantedBy=multi-user.target

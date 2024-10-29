@@ -1,0 +1,6 @@
+---
+# vars file for docker-systemd
+containers:
+  - {name: app_php-fpm, image: php:8.2-fpm}
+  - {name: app_nginx, image: nginx, ports: 8080:80}
+  - {name: app_db, image: mysql, volumes: /opt/mysql/data:/var/lib/mysql, envs: "MYSQL_ROOT_PASSWORD: root"}

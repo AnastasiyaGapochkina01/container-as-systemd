@@ -1,0 +1,31 @@
+---
+# tasks file for docker-systemd
+- name: Pull images
+  command: docker pull "{{ item }}"
+  loop: "{{ containers | map(attribute='image') | list }}"
+
+- name: Create unit file
+  template:
+    src: container.j2.service
+    dest: /etc/systemd/system/{{ item.name }}.service
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ containers }}"
+  register: create_unit_file
+
+- name: Run daemon-reload to systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Start and enable containers
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  loop: "{{ containers | map(attribute='name') | list }}"
+
+- name: Ensure is container really started
+  command: systemctl is-active "{{ item }}"
+  loop: "{{ containers | map(attribute='name') | list }}"
+  register: container_stat
